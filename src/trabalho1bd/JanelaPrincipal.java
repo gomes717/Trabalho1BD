@@ -104,7 +104,14 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 rsAux = metadata.getTables(rs.getString(1), null, "%", new String[] {"VIEW"});
                 while(rsAux.next())
                 {
-                    viewNode.add(new DefaultMutableTreeNode(rsAux.getString(3)));
+                    String tmpName = rsAux.getString(3);
+                    DefaultMutableTreeNode tmpNode = new DefaultMutableTreeNode(tmpName);
+                    viewNode.add(tmpNode);
+                    ResultSet rsView = metadata.getColumns(null, null, rsAux.getString(3), null);
+                    while(rsView.next())
+                    {
+                        tmpNode.add(new DefaultMutableTreeNode(rsView.getString(4)));
+                    }
                 }
             }
             
