@@ -64,9 +64,42 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 auxNode.add(tableNode);
                 auxNode.add(viewNode);
                 ResultSet rsAux = metadata.getTables(rs.getString(1), null, "%", new String[] {"TABLE"});
+                
+                
                 while(rsAux.next())
                 {
-                    tableNode.add(new DefaultMutableTreeNode(rsAux.getString(3)));
+                    String tmpName = rsAux.getString(3);
+                    DefaultMutableTreeNode tmpNode = new DefaultMutableTreeNode(tmpName);
+                    tableNode.add(tmpNode);
+                    DefaultMutableTreeNode colNode = new DefaultMutableTreeNode("Columns");
+                    DefaultMutableTreeNode indNode = new DefaultMutableTreeNode("Indexes");
+                    DefaultMutableTreeNode fkNode = new DefaultMutableTreeNode("Foreign Keys");
+                    DefaultMutableTreeNode trigNode = new DefaultMutableTreeNode("Triggers");
+                    
+                    tmpNode.add(colNode);
+                    tmpNode.add(indNode);
+                    tmpNode.add(fkNode);
+                    tmpNode.add(trigNode);
+                    ResultSet rsTable = metadata.getColumns(null, null, rsAux.getString(3), null);
+                    while(rsTable.next())
+                    {
+                        colNode.add(new DefaultMutableTreeNode(rsTable.getString(4)));
+                    }
+                    rsTable = metadata.getIndexInfo(null, null, rsAux.getString(3), true, false);
+                    while(rsTable.next())
+                    {
+                        indNode.add(new DefaultMutableTreeNode(rsTable.getString(6)));
+                    }
+                    rsTable = metadata.getImportedKeys(null, null, rsAux.getString(3));
+                    while(rsTable.next())
+                    {
+                        fkNode.add(new DefaultMutableTreeNode(rsTable.getString(12)));
+                    }
+                    rsTable = metadata.getTables(null, null, rsAux.getString(3), new String[] {"TRIGGER"});
+                    while(rsTable.next())
+                    {
+                        fkNode.add(new DefaultMutableTreeNode(rsTable.getString(3)));
+                    }
                 }
                 rsAux = metadata.getTables(rs.getString(1), null, "%", new String[] {"VIEW"});
                 while(rsAux.next())
