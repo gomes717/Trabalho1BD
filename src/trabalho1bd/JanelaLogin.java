@@ -143,7 +143,7 @@ public class JanelaLogin extends javax.swing.JFrame {
        senha = senhaField.getText();
        url = urlField.getText();
        try{
-        con = DriverManager.getConnection("jdbc:"+url+"?autoReconnect=true&useSSL=false", login, senha);
+        con = DriverManager.getConnection("jdbc:"+url, login, senha);
         System.out.println("Connection sucessfull");
         con.close();
         this.setVisible(false);

@@ -5,6 +5,7 @@
  */
 package trabalho1bd;
 
+import com.mysql.cj.jdbc.DatabaseMetaData;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -34,7 +35,7 @@ public class JanelaPrincipal extends javax.swing.JFrame {
         this.url = url;
 
         try{
-        con = DriverManager.getConnection("jdbc:"+url+"?autoReconnect=true&useSSL=false", login, senha);
+        con = DriverManager.getConnection("jdbc:"+url, login, senha);
         stmt = con.createStatement();
         updateTree();
         } catch(SQLException e)
@@ -51,7 +52,8 @@ public class JanelaPrincipal extends javax.swing.JFrame {
         //criar root da arvore
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(url);
         try{
-        rs = stmt.executeQuery("show databases");
+            java.sql.DatabaseMetaData metadata = con.getMetaData();
+            rs =  metadata.getCatalogs();
             while(rs.next())
             {   
                 String auxName = rs.getString(1);
@@ -61,18 +63,15 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 DefaultMutableTreeNode viewNode = new DefaultMutableTreeNode("views");
                 auxNode.add(tableNode);
                 auxNode.add(viewNode);
-                //daqui pra baixo foi uma gambiarra, tenta consertar usando metaData se nao conseguir mantenha, isso ja funciona
-                Connection connAux = DriverManager.getConnection("jdbc:"+url+auxName+"?autoReconnect=true&useSSL=false", login, senha);
-                Statement stmtAux = connAux.createStatement();
-                ResultSet rsAux = stmtAux.executeQuery("show tables");
+                ResultSet rsAux = metadata.getTables(rs.getString(1), null, "%", new String[] {"TABLE"});
                 while(rsAux.next())
                 {
-                    tableNode.add(new DefaultMutableTreeNode(rsAux.getString(1)));
+                    tableNode.add(new DefaultMutableTreeNode(rsAux.getString(3)));
                 }
-                rsAux = stmtAux.executeQuery("SHOW FULL TABLES IN "+ auxName + " WHERE TABLE_TYPE LIKE 'VIEW';");
+                rsAux = metadata.getTables(rs.getString(1), null, "%", new String[] {"VIEW"});
                 while(rsAux.next())
                 {
-                    viewNode.add(new DefaultMutableTreeNode(rsAux.getString(1)));
+                    viewNode.add(new DefaultMutableTreeNode(rsAux.getString(3)));
                 }
             }
             
