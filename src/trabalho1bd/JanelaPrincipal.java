@@ -61,24 +61,24 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 DefaultMutableTreeNode viewNode = new DefaultMutableTreeNode("views");
                 auxNode.add(tableNode);
                 auxNode.add(viewNode);
+                //daqui pra baixo foi uma gambiarra, tenta consertar usando metaData se nao conseguir mantenha, isso ja funciona
                 Connection connAux = DriverManager.getConnection("jdbc:"+url+auxName+"?autoReconnect=true&useSSL=false", login, senha);
                 Statement stmtAux = connAux.createStatement();
                 ResultSet rsAux = stmtAux.executeQuery("show tables");
                 while(rsAux.next())
                 {
-                    DefaultMutableTreeNode auxTableNode = new DefaultMutableTreeNode(rsAux.getString(1));
-                    tableNode.add(auxTableNode);
+                    tableNode.add(new DefaultMutableTreeNode(rsAux.getString(1)));
                 }
                 rsAux = stmtAux.executeQuery("SHOW FULL TABLES IN "+ auxName + " WHERE TABLE_TYPE LIKE 'VIEW';");
                 while(rsAux.next())
                 {
-                    DefaultMutableTreeNode auxViewNode = new DefaultMutableTreeNode(rsAux.getString(1));
-                    viewNode.add(auxViewNode);
+                    viewNode.add(new DefaultMutableTreeNode(rsAux.getString(1)));
                 }
             }
+            
         } catch(SQLException e)
         {
-            System.out.println(e.getMessage());
+            System.out.println(e.getMessage() + "2");
         }
         jTree = new javax.swing.JTree(root);
         add(jTree);
