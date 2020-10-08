@@ -1,11 +1,13 @@
 
 package trabalho1bd;
 
+import java.awt.Color;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 
 /**
  *
@@ -22,7 +24,7 @@ public class JanelaLogin extends javax.swing.JFrame {
     
     public JanelaLogin() {
         initComponents();
-
+        this.setTitle("Login Page");
     }
 
     /**
@@ -42,6 +44,7 @@ public class JanelaLogin extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         urlField = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
 
         jTextField1.setText("jTextField1");
 
@@ -97,7 +100,9 @@ public class JanelaLogin extends javax.swing.JFrame {
                     .addComponent(senhaField)
                     .addComponent(urlField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addContainerGap()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton1)))
                 .addContainerGap())
         );
@@ -117,7 +122,9 @@ public class JanelaLogin extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(urlField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jButton1))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton1)
+                    .addComponent(jLabel4)))
         );
 
         pack();
@@ -137,7 +144,6 @@ public class JanelaLogin extends javax.swing.JFrame {
        url = urlField.getText();
        try{
         con = DriverManager.getConnection("jdbc:"+url+"?autoReconnect=true&useSSL=false", login, senha);
-        stmt = con.createStatement();
         System.out.println("Connection sucessfull");
         con.close();
         this.setVisible(false);
@@ -146,6 +152,8 @@ public class JanelaLogin extends javax.swing.JFrame {
        catch(SQLException e)
        {
            System.out.println(e.getMessage());
+           jLabel4.setText("Um ou mais campo(s) errado(s)");
+           jLabel4.setForeground(Color.red);
        }
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -163,6 +171,7 @@ public class JanelaLogin extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField loginField;
     private javax.swing.JPasswordField senhaField;

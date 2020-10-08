@@ -28,11 +28,11 @@ public class JanelaPrincipal extends javax.swing.JFrame {
     public JanelaPrincipal(String login, String senha, String url) {
         initComponents();
         this.setTitle("Janela Principal");
+        //passagem de parametros da janela login
         this.login = login;
         this.senha = senha;
         this.url = url;
-        System.out.println(login + " " + senha);
-        //criar root da arvore
+
         try{
         con = DriverManager.getConnection("jdbc:"+url+"?autoReconnect=true&useSSL=false", login, senha);
         stmt = con.createStatement();
@@ -53,13 +53,28 @@ public class JanelaPrincipal extends javax.swing.JFrame {
         try{
         rs = stmt.executeQuery("show databases");
             while(rs.next())
-            {
-                DefaultMutableTreeNode auxNode = new DefaultMutableTreeNode(rs.getString(1));
+            {   
+                String auxName = rs.getString(1);
+                DefaultMutableTreeNode auxNode = new DefaultMutableTreeNode(auxName);
                 root.add(auxNode);
                 DefaultMutableTreeNode tableNode = new DefaultMutableTreeNode("Tables");
                 DefaultMutableTreeNode viewNode = new DefaultMutableTreeNode("views");
                 auxNode.add(tableNode);
                 auxNode.add(viewNode);
+                Connection connAux = DriverManager.getConnection("jdbc:"+url+auxName+"?autoReconnect=true&useSSL=false", login, senha);
+                Statement stmtAux = connAux.createStatement();
+                ResultSet rsAux = stmtAux.executeQuery("show tables");
+                while(rsAux.next())
+                {
+                    DefaultMutableTreeNode auxTableNode = new DefaultMutableTreeNode(rsAux.getString(1));
+                    tableNode.add(auxTableNode);
+                }
+                rsAux = stmtAux.executeQuery("SHOW FULL TABLES IN "+ auxName + " WHERE TABLE_TYPE LIKE 'VIEW';");
+                while(rsAux.next())
+                {
+                    DefaultMutableTreeNode auxViewNode = new DefaultMutableTreeNode(rsAux.getString(1));
+                    viewNode.add(auxViewNode);
+                }
             }
         } catch(SQLException e)
         {
