@@ -97,7 +97,14 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 
                 while(rsAux.next())
                 {
-                    String tmpName = rsAux.getString(1);
+                    String tmpName = null;
+                    if (mysql == 1)
+                    {
+                        tmpName = rsAux.getString(3);
+                    }
+                    else
+                        tmpName = rsAux.getString(1);
+                    
                     DefaultMutableTreeNode tmpNode = new DefaultMutableTreeNode(tmpName);
                     tableNode.add(tmpNode);
                     DefaultMutableTreeNode colNode = new DefaultMutableTreeNode("Columns");
