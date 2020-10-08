@@ -22,14 +22,6 @@ public class JanelaLogin extends javax.swing.JFrame {
     
     public JanelaLogin() {
         initComponents();
-        try{
-            Class.forName("com.mysql.jdbc.Driver");
-        }
-        catch(ClassNotFoundException e)
-        {
-            System.out.println("Driver nao encontrado");
-            System.exit(0);
-        }
 
     }
 
@@ -146,9 +138,7 @@ public class JanelaLogin extends javax.swing.JFrame {
        try{
         con = DriverManager.getConnection("jdbc:"+url+"?autoReconnect=true&useSSL=false", login, senha);
         stmt = con.createStatement();
-        rs = stmt.executeQuery("select id from instructor");
-            while(rs.next())
-                System.out.println(rs.getString(1));
+        System.out.println("Connection sucessfull");
         con.close();
         this.setVisible(false);
         new JanelaPrincipal(login, senha, url).setVisible(true);
@@ -157,7 +147,6 @@ public class JanelaLogin extends javax.swing.JFrame {
        {
            System.out.println(e.getMessage());
        }
-       
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void urlFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_urlFieldActionPerformed

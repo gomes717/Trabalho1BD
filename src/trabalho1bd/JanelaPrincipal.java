@@ -6,8 +6,11 @@
 package trabalho1bd;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  *
@@ -21,13 +24,39 @@ public class JanelaPrincipal extends javax.swing.JFrame {
     protected Connection con;
     protected Statement stmt;
     protected ResultSet rs;
+    private javax.swing.JTree jTree;
     
     public JanelaPrincipal(String login, String senha, String url) {
         initComponents();
+        this.setTitle("Janela Principal");
         this.login = login;
         this.senha = senha;
         this.url = url;
         System.out.println(login + " " + senha);
+        //criar root da arvore
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(url);
+        try{
+        con = DriverManager.getConnection("jdbc:"+url+"?autoReconnect=true&useSSL=false", login, senha);
+        stmt = con.createStatement();
+        rs = stmt.executeQuery("show databases");
+            while(rs.next())
+            {
+                DefaultMutableTreeNode auxNode = new DefaultMutableTreeNode(rs.getString(1));
+                root.add(auxNode);
+                DefaultMutableTreeNode tableNode = new DefaultMutableTreeNode("Tables");
+                DefaultMutableTreeNode viewNode = new DefaultMutableTreeNode("views");
+                auxNode.add(tableNode);
+                auxNode.add(viewNode);
+            }
+        } catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        jTree = new javax.swing.JTree(root);
+        add(jTree);
+        jTree.setRootVisible(false);
+        jScrollPane2.setViewportView(jTree);
+        this.pack();
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -38,27 +67,21 @@ public class JanelaPrincipal extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jTextField1 = new javax.swing.JTextField();
+        jScrollPane2 = new javax.swing.JScrollPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        jTextField1.setText("jTextField1");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 715, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
-                .addContainerGap())
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 474, Short.MAX_VALUE)
         );
 
         pack();
@@ -100,6 +123,6 @@ public class JanelaPrincipal extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
 }
