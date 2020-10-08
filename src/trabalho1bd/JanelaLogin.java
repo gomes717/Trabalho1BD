@@ -2,12 +2,19 @@
 package trabalho1bd;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -15,9 +22,15 @@ import java.io.*;
  */
 public class JanelaLogin extends javax.swing.JFrame {
 
+    private List<String> logins = new ArrayList();
+    private List<String> senhas = new ArrayList();
+    private List<String> urls = new ArrayList();
+    private List<String> saveNames = new ArrayList();
     private String login;
     private String senha;
     private String url;
+    private int n_saves = 0;
+    private int save = 0;
     private Connection con;
     private Statement stmt;
     private ResultSet rs;
@@ -29,11 +42,48 @@ public class JanelaLogin extends javax.swing.JFrame {
         if(!file.exists())
             file.createNewFile();
         
+        if (file.length() == 0)
+        {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+            bw.write("save"+"\n");
+            bw.write("\n");
+            bw.write("\n");
+            bw.write("\n");
+            bw.close();
+        }
+        
         FileReader ler = new FileReader("save.txt");
         BufferedReader reader = new BufferedReader(ler);
-        loginField.setText(reader.readLine());
-        senhaField.setText(reader.readLine());
-        urlField.setText(reader.readLine());
+        //save = Integer.valueOf(reader.readLine());
+        
+        String line;
+        String login;
+        String senha;
+        String url;
+        String saveName;
+        n_saves = 0;
+        
+        while ((line = reader.readLine()) != null)
+        {
+            saveName = line;
+            saveField.setText(saveName);
+            if (!(saveName.equals("")))
+            {
+                jComboBox1.addItem(saveName);
+                saveNames.add(saveName);
+            }
+            login = reader.readLine();
+            loginField.setText(login);
+            logins.add(login);
+            senha = reader.readLine();
+            senhaField.setText(senha);
+            senhas.add(senha);
+            url = reader.readLine();
+            urlField.setText(url);
+            urls.add(url);
+            jComboBox1.setSelectedIndex(n_saves);
+            n_saves++;
+        }
        
         
         }
@@ -42,6 +92,7 @@ public class JanelaLogin extends javax.swing.JFrame {
             System.out.println(e.getMessage());
         }
     }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -61,6 +112,10 @@ public class JanelaLogin extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         loginField = new javax.swing.JTextField();
+        jComboBox1 = new javax.swing.JComboBox<>();
+        jLabel5 = new javax.swing.JLabel();
+        saveField = new javax.swing.JTextField();
+        jButton2 = new javax.swing.JButton();
 
         jTextField1.setText("jTextField1");
 
@@ -92,6 +147,27 @@ public class JanelaLogin extends javax.swing.JFrame {
 
         jLabel3.setText("URL:");
 
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox1ActionPerformed(evt);
+            }
+        });
+
+        jLabel5.setText("Save");
+
+        saveField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveFieldActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("Salvar");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -99,39 +175,57 @@ public class JanelaLogin extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(senhaField)
-                    .addComponent(urlField, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1))
+                    .addComponent(loginField)
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel1))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(loginField))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton2)
+                                .addGap(18, 18, 18)
+                                .addComponent(jButton1))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(72, 72, 72))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel1)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel5))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addComponent(saveField, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(urlField, javax.swing.GroupLayout.DEFAULT_SIZE, 474, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(27, 27, 27)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel1)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addComponent(loginField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(senhaField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(urlField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
+                .addComponent(jLabel5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(saveField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton1)
+                        .addComponent(jButton2))
                     .addComponent(jLabel4)))
         );
 
@@ -152,13 +246,6 @@ public class JanelaLogin extends javax.swing.JFrame {
         con.close();
         this.setVisible(false);
         new JanelaPrincipal(login, senha, url).setVisible(true);
-        
-        File file = new File("save.txt");
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
-        bw.write(login+"\n");
-        bw.write(senha+"\n");
-        bw.write(url+"\n");
-        bw.close();
        }
        catch(SQLException e)
        {
@@ -166,16 +253,87 @@ public class JanelaLogin extends javax.swing.JFrame {
            jLabel4.setText("Um ou mais campo(s) errado(s)");
            jLabel4.setForeground(Color.red);
        }
-       catch(IOException e )
-       {
-           System.out.println(e.getMessage());
-       }
-       
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void urlFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_urlFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_urlFieldActionPerformed
+
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        // TODO add your handling code here:
+        int aux = jComboBox1.getSelectedIndex();
+
+                save = aux;
+                if (aux < saveNames.size())
+                {
+                    loginField.setText(logins.get(aux));
+                    senhaField.setText(senhas.get(aux));
+                    urlField.setText(urls.get(aux));
+                }
+        
+    }//GEN-LAST:event_jComboBox1ActionPerformed
+
+    private void saveFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_saveFieldActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        BufferedWriter bw = null;
+        try {
+            // TODO add your handling code here:
+            String sv = saveField.getText();
+            int aux = 0;
+            int flag = 0;
+            while (aux < n_saves)
+            {
+                if(!(sv.equals(saveNames.get(aux))))
+                {
+                    aux++;
+                }
+                    
+                else
+                {
+                    flag = 1;
+                    aux++;
+                    break;
+                }
+                
+            }
+            aux--;
+           if (flag == 1)
+            {
+                logins.set(aux, loginField.getText());
+                senhas.set(aux, senhaField.getText());
+                urls.set(aux, urlField.getText());
+            }
+            else
+            {
+                logins.add(loginField.getText());
+                senhas.add(senhaField.getText());
+                urls.add(urlField.getText());
+                saveNames.add(saveField.getText());
+                n_saves++;
+            }  
+            
+            File file = new File("save.txt");
+            bw = new BufferedWriter(new FileWriter(file.getAbsoluteFile()));
+            for (int i = 0; i < saveNames.size(); i++)
+            {
+                bw.write(saveNames.get(i) + "\n");
+                bw.write(logins.get(i) + "\n");
+                bw.write(senhas.get(i) + "\n");
+                bw.write(urls.get(i) + "\n");
+            }   bw.close();
+        } catch (IOException ex) {
+            Logger.getLogger(JanelaLogin.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                bw.close();
+            } catch (IOException ex) {
+                Logger.getLogger(JanelaLogin.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
     //mysql://localhost/universidade
     /**
      * @param args the command line arguments
@@ -184,12 +342,16 @@ public class JanelaLogin extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField loginField;
+    private javax.swing.JTextField saveField;
     private javax.swing.JPasswordField senhaField;
     private javax.swing.JTextField urlField;
     // End of variables declaration//GEN-END:variables
