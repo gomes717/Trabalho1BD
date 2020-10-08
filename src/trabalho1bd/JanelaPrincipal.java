@@ -31,6 +31,7 @@ public class JanelaPrincipal extends javax.swing.JFrame {
     protected String senha;
     protected String url;
     protected Connection con;
+    private int mysql = 0;
     protected Statement stmt;
     private javax.swing.JTree jTree;
     private java.sql.DatabaseMetaData metadata;
@@ -44,6 +45,11 @@ public class JanelaPrincipal extends javax.swing.JFrame {
         this.url = url;
         try{
         con = DriverManager.getConnection("jdbc:"+url, login, senha);
+        if (url.indexOf("mysql") == 0)
+            mysql = 1;
+        else
+            mysql = 0;
+        System.out.println(mysql);
         stmt = con.createStatement();
         this.metadata = con.getMetaData();
         updateTree();
@@ -61,7 +67,15 @@ public class JanelaPrincipal extends javax.swing.JFrame {
         //criar root da arvore
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(url);
         try{
-            rs =  metadata.getCatalogs();
+            ResultSet rsc = null;
+            if (mysql == 1)
+                rs =  metadata.getCatalogs();
+            else
+            {
+                rsc = metadata.getCatalogs();
+                rs =  metadata.getSchemas();
+            }
+            
             while(rs.next())
             {   
                 String auxName = rs.getString(1);
@@ -71,12 +85,19 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 DefaultMutableTreeNode viewNode = new DefaultMutableTreeNode("views");
                 auxNode.add(tableNode);
                 auxNode.add(viewNode);
-                ResultSet rsAux = metadata.getTables(rs.getString(1), null, "%", new String[] {"TABLE"});
-                
+                ResultSet rsAux;
+                if (mysql == 1)
+                    rsAux = metadata.getTables(rs.getString(1), null, "%", new String[] {"TABLE"});
+                else
+                {
+                    rsAux = stmt.executeQuery("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';");
+                    
+                }
+                    //rsAux = metadata.getTables(rs.getString(1), null, "%", new String[] {"TABLE"});
                 
                 while(rsAux.next())
                 {
-                    String tmpName = rsAux.getString(3);
+                    String tmpName = rsAux.getString(1);
                     DefaultMutableTreeNode tmpNode = new DefaultMutableTreeNode(tmpName);
                     tableNode.add(tmpNode);
                     DefaultMutableTreeNode colNode = new DefaultMutableTreeNode("Columns");
@@ -88,26 +109,53 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                     tmpNode.add(indNode);
                     tmpNode.add(fkNode);
                     tmpNode.add(trigNode);
-                    ResultSet rsTable = metadata.getColumns(null, null, rsAux.getString(3), null);
-                    while(rsTable.next())
+                    if (mysql == 1)
                     {
-                        colNode.add(new DefaultMutableTreeNode(rsTable.getString(4)));
+                        ResultSet rsTable = metadata.getColumns(null, null, rsAux.getString(3), null);
+                        while(rsTable.next())
+                        {
+                            colNode.add(new DefaultMutableTreeNode(rsTable.getString(4)));
+                        }
+                        rsTable = metadata.getIndexInfo(null, null, rsAux.getString(3), true, false);
+                        while(rsTable.next())
+                        {
+                            indNode.add(new DefaultMutableTreeNode(rsTable.getString(6)));
+                        }
+                        rsTable = metadata.getImportedKeys(null, null, rsAux.getString(3));
+                        while(rsTable.next())
+                        {
+                            fkNode.add(new DefaultMutableTreeNode(rsTable.getString(12)));
+                        }
+                        rsTable = metadata.getTables(null, null, rsAux.getString(3), new String[] {"TRIGGER"});
+                        while(rsTable.next())
+                        {
+                            fkNode.add(new DefaultMutableTreeNode(rsTable.getString(3)));
+                        }
                     }
-                    rsTable = metadata.getIndexInfo(null, null, rsAux.getString(3), true, false);
-                    while(rsTable.next())
+                    else
                     {
-                        indNode.add(new DefaultMutableTreeNode(rsTable.getString(6)));
+                        ResultSet rsTable = metadata.getColumns(null, null, rsAux.getString(1), null);
+                        while(rsTable.next())
+                        {
+                            colNode.add(new DefaultMutableTreeNode(rsTable.getString(4)));
+                        }
+                        rsTable = metadata.getIndexInfo(null, null, rsAux.getString(1), true, false);
+                        while(rsTable.next())
+                        {
+                            indNode.add(new DefaultMutableTreeNode(rsTable.getString(6)));
+                        }
+                        rsTable = metadata.getImportedKeys(null, null, rsAux.getString(1));
+                        while(rsTable.next())
+                        {
+                            fkNode.add(new DefaultMutableTreeNode(rsTable.getString(12)));
+                        }
+                        rsTable = metadata.getTables(null, null, rsAux.getString(1), new String[] {"TRIGGER"});
+                        while(rsTable.next())
+                        {
+                            fkNode.add(new DefaultMutableTreeNode(rsTable.getString(3)));
+                        }
                     }
-                    rsTable = metadata.getImportedKeys(null, null, rsAux.getString(3));
-                    while(rsTable.next())
-                    {
-                        fkNode.add(new DefaultMutableTreeNode(rsTable.getString(12)));
-                    }
-                    rsTable = metadata.getTables(null, null, rsAux.getString(3), new String[] {"TRIGGER"});
-                    while(rsTable.next())
-                    {
-                        fkNode.add(new DefaultMutableTreeNode(rsTable.getString(3)));
-                    }
+                    
                 }
                 rsAux = metadata.getTables(rs.getString(1), null, "%", new String[] {"VIEW"});
                 while(rsAux.next())
@@ -240,16 +288,17 @@ public class JanelaPrincipal extends javax.swing.JFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         try {
             // TODO add your handling code here:
-            System.out.println("Erro");
             TreePath tp = jTree.getSelectionPath();
-            System.out.println("Erro");
             String query = jTextArea2.getText();
             int select = 0;
             
             if (!query.equals(""))
             {
-                System.out.println("use "+ tp.getPathComponent(1).toString() +"; " + query);
-                stmt.executeQuery("use "+ tp.getPathComponent(1).toString() +";");
+                if (mysql == 1)
+                {
+                    System.out.println("use "+ tp.getPathComponent(1).toString() +"; " + query);
+                    stmt.executeQuery("use "+ tp.getPathComponent(1).toString() +";");
+                }
 
                 
                 if (query.indexOf("select") == 0 || query.indexOf("SELECT") == 0)
@@ -258,6 +307,8 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 
                 if (select == 1)
                 {
+                    if (mysql == 1)
+                        stmt.executeQuery("use "+ tp.getPathComponent(1).toString() +";");
                     ResultSet rsU = stmt.executeQuery(query);
                     java.sql.ResultSetMetaData rsUmt = rsU.getMetaData();
                     String textFull="";
@@ -280,8 +331,12 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                 }
                 else
                 {
-                    System.out.println("use "+ tp.getPathComponent(1).toString() +"; " + query);
-                    stmt.executeQuery("use "+ tp.getPathComponent(1).toString() +";");
+                    if (mysql == 1)
+                    {
+                        System.out.println("use "+ tp.getPathComponent(1).toString() +"; " + query);
+                        stmt.executeQuery("use "+ tp.getPathComponent(1).toString() +";");
+                    }
+                    
                     stmt.executeUpdate(query);
                 }
             }
@@ -325,8 +380,11 @@ public class JanelaPrincipal extends javax.swing.JFrame {
     
     private void updateTableDoubleClick(TreePath tp) throws SQLException
     {
-        System.out.println("use "+ tp.getPathComponent(1).toString() +"; select * from "+tp.getPathComponent(3).toString() + " limit 20;");
-        stmt.executeQuery("use "+ tp.getPathComponent(1).toString() +";");
+        if (mysql == 1)
+        {
+            System.out.println("use "+ tp.getPathComponent(1).toString() +"; select * from "+tp.getPathComponent(3).toString() + " limit 20;");
+             stmt.executeQuery("use "+ tp.getPathComponent(1).toString() +";");
+        }
         ResultSet rsU = stmt.executeQuery("select * from "+tp.getPathComponent(3).toString()+" limit 20;");
         java.sql.ResultSetMetaData rsUmt = rsU.getMetaData();
         String textFull="";
