@@ -6,12 +6,18 @@
 package trabalho1bd;
 
 import com.mysql.cj.jdbc.DatabaseMetaData;
+import com.mysql.cj.jdbc.result.ResultSetMetaData;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Vector;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 /**
  *
@@ -25,7 +31,8 @@ public class JanelaPrincipal extends javax.swing.JFrame {
     protected Connection con;
     protected Statement stmt;
     private javax.swing.JTree jTree;
-    
+    private java.sql.DatabaseMetaData metadata;
+    private String lastClicked = null;
     public JanelaPrincipal(String login, String senha, String url) {
         initComponents();
         this.setTitle("Janela Principal");
@@ -33,10 +40,10 @@ public class JanelaPrincipal extends javax.swing.JFrame {
         this.login = login;
         this.senha = senha;
         this.url = url;
-
         try{
         con = DriverManager.getConnection("jdbc:"+url, login, senha);
         stmt = con.createStatement();
+        this.metadata = con.getMetaData();
         updateTree();
         } catch(SQLException e)
         {
@@ -52,7 +59,6 @@ public class JanelaPrincipal extends javax.swing.JFrame {
         //criar root da arvore
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(url);
         try{
-            java.sql.DatabaseMetaData metadata = con.getMetaData();
             rs =  metadata.getCatalogs();
             while(rs.next())
             {   
@@ -120,6 +126,11 @@ public class JanelaPrincipal extends javax.swing.JFrame {
             System.out.println(e.getMessage() + "2");
         }
         jTree = new javax.swing.JTree(root);
+        jTree.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTreeMouseClicked(evt);
+            }
+        });
         add(jTree);
         jTree.setRootVisible(false);
         jScrollPane2.setViewportView(jTree);
@@ -137,6 +148,13 @@ public class JanelaPrincipal extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jLabel1 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea2 = new javax.swing.JTextArea();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -149,6 +167,18 @@ public class JanelaPrincipal extends javax.swing.JFrame {
             }
         });
 
+        jLabel3.setText("jLabel3");
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane3.setViewportView(jTextArea1);
+
+        jTextArea2.setColumns(20);
+        jTextArea2.setRows(5);
+        jScrollPane1.setViewportView(jTextArea2);
+
+        jButton2.setText("execute");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -160,16 +190,39 @@ public class JanelaPrincipal extends javax.swing.JFrame {
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(867, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 624, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton2)))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 458, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel3))
+                            .addComponent(jButton2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 458, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         pack();
@@ -179,6 +232,63 @@ public class JanelaPrincipal extends javax.swing.JFrame {
         updateTree();
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jTreeMouseClicked(java.awt.event.MouseEvent evt) {
+        
+        TreePath tp = jTree.getSelectionPath();
+        try{
+             if(tp.getPathCount()>3){
+                System.out.println(tp.getPathComponent(3).toString());
+                ResultSet rsTable = metadata.getColumns(null, null,tp.getPathComponent(3).toString(), null);
+                if(tp.getPathComponent(3).toString().equalsIgnoreCase(lastClicked))
+                    updateTableDoubleClick(tp);
+                else
+                    updateTable(rsTable);
+                lastClicked = tp.getPathComponent(3).toString();
+             }
+        }
+        catch(SQLException|NullPointerException e)
+        {
+            System.out.println(e.getMessage());
+        }
+    }                                   
+    private void updateTable(ResultSet rsTable) throws SQLException
+    {   
+       String textFull = "Field\tType\tNull\n";
+       while(rsTable.next())
+       {    
+           textFull += rsTable.getString(4)+"\t"+rsTable.getString(6)+"\t"+rsTable.getString(18)+"\n";
+       }
+       rsTable.last();
+       jLabel3.setText(rsTable.getString(3));
+       jTextArea1.setText(textFull);
+
+    }
+    
+    private void updateTableDoubleClick(TreePath tp) throws SQLException
+    {
+        System.out.println("use "+ tp.getPathComponent(1).toString() +"; select * from "+tp.getPathComponent(3).toString() + " limit 20;");
+        stmt.executeQuery("use "+ tp.getPathComponent(1).toString() +";");
+        ResultSet rsU = stmt.executeQuery("select * from "+tp.getPathComponent(3).toString()+" limit 20;");
+        java.sql.ResultSetMetaData rsUmt = rsU.getMetaData();
+        String textFull="";
+            int i = 1;
+            while(i <=rsUmt.getColumnCount()){
+                textFull += rsUmt.getColumnName(i)+"\t";
+                i++;
+            }
+        textFull += "\n";
+        while(rsU.next())
+        {
+            i = 1;
+            while(i <=rsUmt.getColumnCount()){
+                textFull += rsU.getString(i)+"\t";
+                i++;
+            }
+            textFull += "\n";
+        }
+        jTextArea1.setText(textFull);
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -216,7 +326,14 @@ public class JanelaPrincipal extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextArea jTextArea2;
     // End of variables declaration//GEN-END:variables
 }
